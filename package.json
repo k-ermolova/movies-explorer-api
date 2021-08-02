@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "API",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
@@ -19,7 +20,10 @@
   },
   "homepage": "https://github.com/k-ermolova/movies-explorer-api#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.13.5",
+    "mongoose-validator": "^2.1.0",
+    "validator": "^13.6.0"
   },
   "devDependencies": {
     "eslint": "^7.31.0",
