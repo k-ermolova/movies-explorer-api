@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { errors } from 'celebrate';
+import cors from 'cors';
 import usersRoutes from './routes/users.js';
 import moviesRoutes from './routes/movies.js';
 import { createUser, login } from './controllers/users.js';
@@ -21,6 +22,8 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
 });
 
 app.use(express.json());
+
+app.use(cors());
 
 app.use(requestLogger);
 
