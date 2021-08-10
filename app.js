@@ -27,13 +27,13 @@ app.use(cors());
 
 app.use(requestLogger);
 
-app.post('/api/signup', registrationValidator, createUser);
-app.post('/api/signin', loginValidator, login);
+app.post('signup', registrationValidator, createUser);
+app.post('signin', loginValidator, login);
 
 app.use(auth);
 
-app.use('/api/users', usersRoutes);
-app.use('/api/movies', moviesRoutes);
+app.use('users', usersRoutes);
+app.use('movies', moviesRoutes);
 app.use('*', notFound);
 
 app.use(errorLogger);
