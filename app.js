@@ -30,7 +30,7 @@ app.use(requestLogger);
 app.post('/api/signup', registrationValidator, createUser);
 app.post('/api/signin', loginValidator, login);
 
-app.use(auth);
+app.use('/api', auth);
 
 app.use('/api/users', usersRoutes);
 app.use('/api/movies', moviesRoutes);
