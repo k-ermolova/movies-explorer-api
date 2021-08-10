@@ -27,6 +27,14 @@ app.use(cors());
 
 app.use(requestLogger);
 
+app.get('/', (req, res) => {
+  res.status(200).send({ message: 'ты в корне' });
+});
+
+app.get('/api', (req, res) => {
+  res.status(200).send({ message: 'ты в api' });
+});
+
 app.post('/api/signup', registrationValidator, createUser);
 app.post('/api/signin', loginValidator, login);
 
