@@ -1,5 +1,14 @@
 import { celebrate, Joi } from 'celebrate';
 import validator from 'validator';
+import { urlErrorMessage } from '../utils/constants.js';
+
+const isUrlMethod = (value) => {
+  const result = validator.isURL(value);
+  if (result) {
+    return value;
+  }
+  throw new Error(urlErrorMessage);
+};
 
 const registrationValidator = celebrate({
   body: Joi.object().keys({
@@ -16,6 +25,13 @@ const loginValidator = celebrate({
   }),
 });
 
+const userInfoValidator = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().email(),
+  }),
+});
+
 const movieValidator = celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
@@ -23,37 +39,10 @@ const movieValidator = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().custom(
-      (value, helpers) => {
-        if (validator.isURL(value, {
-          require_protocol: true,
-        })) {
-          return value;
-        }
-        return helpers.message('Некорректный формат ссылки.');
-      },
-    ),
-    trailer: Joi.string().custom(
-      (value, helpers) => {
-        if (validator.isURL(value, {
-          require_protocol: true,
-        })) {
-          return value;
-        }
-        return helpers.message('Некорректный формат ссылки.');
-      },
-    ),
-    thumbnail: Joi.string().custom(
-      (value, helpers) => {
-        if (validator.isURL(value, {
-          require_protocol: true,
-        })) {
-          return value;
-        }
-        return helpers.message('Некорректный формат ссылки.');
-      },
-    ),
-    movieId: Joi.string().required(),
+    image: Joi.string().required().custom(isUrlMethod),
+    trailer: Joi.string().required().custom(isUrlMethod),
+    thumbnail: Joi.string().required().custom(isUrlMethod),
+    movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),
@@ -61,13 +50,14 @@ const movieValidator = celebrate({
 
 const idValidator = celebrate({
   params: Joi.object().keys({
-    id: Joi.string(),
+    movieId: Joi.string().required(),
   }),
 });
 
 export {
   registrationValidator,
   loginValidator,
+  userInfoValidator,
   movieValidator,
   idValidator,
 };

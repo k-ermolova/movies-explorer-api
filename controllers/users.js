@@ -6,10 +6,22 @@ import InternalServerError from '../errors/internal-server-error.js';
 import BadRequestError from '../errors/bad-request-err.js';
 import UnauthorizedError from '../errors/unauthorized-err.js';
 import ConflictError from '../errors/conflict-err.js';
+import {
+  MONGO_DUPLICATE_ERROR_CODE,
+  SALT_ROUNDS,
+  serverErrorMessage,
+  userCreatingMessage,
+  userIdMessage,
+  userUpdatingMessage,
+  invalidIdMessage,
+  castError,
+  notFound,
+  validationError,
+  mongoError,
+  emailDuplicateMessage,
+} from '../utils/constants.js';
 
 const { NODE_ENV, JWT_SECRET } = process.env;
-const MONGO_DUPLICATE_ERROR_CODE = 11000;
-const SALT_ROUNDS = 10;
 
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id, { __v: 0 })
@@ -17,14 +29,14 @@ const getCurrentUser = (req, res, next) => {
       if (user) {
         res.send(user);
       } else {
-        next(new NotFoundError('Пользователь по указанному _id не найден.'));
+        next(new NotFoundError(userIdMessage));
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Передан невалидный _id.');
+      if (err.name === castError) {
+        throw new BadRequestError(invalidIdMessage);
       } else {
-        throw new InternalServerError('На сервере произошла ошибка.');
+        throw new InternalServerError(serverErrorMessage);
       }
     })
     .catch(next);
@@ -38,19 +50,17 @@ const updateProfile = (req, res, next) => {
     { email, name },
     { new: true, runValidators: true },
   )
-    .orFail(new Error('NotFound'))
+    .orFail(new Error(notFound))
     .then((user) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError(
-          'Переданы некорректные данные при обновлении профиля.',
-        );
+      if (err.name === validationError) {
+        throw new BadRequestError(userUpdatingMessage);
       } else if (err.name === err.message) {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
+        throw new NotFoundError(userIdMessage);
       } else {
-        throw new InternalServerError('На сервере произошла ошибка.');
+        throw new InternalServerError(serverErrorMessage);
       }
     })
     .catch(next);
@@ -87,21 +97,23 @@ const createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.send(user))
+    .then((user) => {
+      res.send({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError(
-          'Переданы некорректные данные при создании пользователя.',
-        );
+      if (err.name === validationError) {
+        throw new BadRequestError(userCreatingMessage);
       } else if (
-        err.name === 'MongoError'
+        err.name === mongoError
         && err.code === MONGO_DUPLICATE_ERROR_CODE
       ) {
-        throw new ConflictError(
-          'Пользователь с указанным email уже существует.',
-        );
+        throw new ConflictError(emailDuplicateMessage);
       } else {
-        throw new InternalServerError('На сервере произошла ошибка.');
+        throw new InternalServerError(serverErrorMessage);
       }
     })
     .catch(next);

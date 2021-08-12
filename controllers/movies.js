@@ -2,18 +2,28 @@ import Movie from '../models/movie.js';
 import NotFoundError from '../errors/not-found-err.js';
 import InternalServerError from '../errors/internal-server-error.js';
 import BadRequestError from '../errors/bad-request-err.js';
+import ForbiddenError from '../errors/forbidden-err.js';
+import {
+  castError,
+  forbiddenMessage,
+  movieAddingMessage,
+  movieDeletingMessage,
+  movieIdMessage,
+  serverErrorMessage,
+  validationError,
+} from '../utils/constants.js';
 
 const getMovies = (req, res, next) => {
   Movie.find({})
     .then((movies) => res.send(movies))
     .catch(() => {
-      throw new InternalServerError('На сервере произошла ошибка.');
+      throw new InternalServerError(serverErrorMessage);
     })
     .catch(next);
 };
 
 const addMovie = (req, res, next) => {
-  const { owner } = req.user._id;
+  const owner = req.user._id;
   const {
     country,
     director,
@@ -44,10 +54,10 @@ const addMovie = (req, res, next) => {
   })
     .then((movie) => res.send(movie))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при добавлении фильма.');
+      if (err.name === validationError) {
+        throw new BadRequestError(movieAddingMessage);
       } else {
-        throw new InternalServerError('На сервере произошла ошибка.');
+        throw new InternalServerError(serverErrorMessage);
       }
     })
     .catch(next);
@@ -56,6 +66,12 @@ const addMovie = (req, res, next) => {
 const deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .then((movie) => {
+      if (movie && String(movie.owner) !== req.user._id) {
+        next(new ForbiddenError(forbiddenMessage));
+      }
+      return movie;
+    })
+    .then((movie) => {
       if (movie) {
         res.send(movie);
         return Movie.findByIdAndRemove(
@@ -63,14 +79,14 @@ const deleteMovie = (req, res, next) => {
           { new: true },
         );
       }
-      next(new NotFoundError('Фильм с указанным _id не найден.'));
+      next(new NotFoundError(movieIdMessage));
       return movie;
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные для удаления фильма.');
+      if (err.name === castError) {
+        throw new BadRequestError(movieDeletingMessage);
       } else {
-        throw new InternalServerError('На сервере произошла ошибка.');
+        throw new InternalServerError(serverErrorMessage);
       }
     })
     .catch(next);

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import validator from 'mongoose-validator';
+import { urlErrorMessage } from '../utils/constants.js';
 
 const movieSchema = new mongoose.Schema({
   country: {
@@ -26,21 +26,30 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (value) => validator.isURL(value, { protocols: ['http', 'https', 'ftp'], require_tld: true, require_protocol: true }),
+      validator(v) {
+        return /(https?:\/\/)\w*\S*#?./.test(v);
+      },
+      message: urlErrorMessage,
     },
   },
   trailer: {
     type: String,
     required: true,
     validate: {
-      validator: (value) => validator.isURL(value, { protocols: ['http', 'https', 'ftp'], require_tld: true, require_protocol: true }),
+      validator(v) {
+        return /(https?:\/\/)\w*\S*#?./.test(v);
+      },
+      message: urlErrorMessage,
     },
   },
   thumbnail: {
     type: String,
     required: true,
     validate: {
-      validator: (value) => validator.isURL(value, { protocols: ['http', 'https', 'ftp'], require_tld: true, require_protocol: true }),
+      validator(v) {
+        return /(https?:\/\/)\w*\S*#?./.test(v);
+      },
+      message: urlErrorMessage,
     },
   },
   owner: {
