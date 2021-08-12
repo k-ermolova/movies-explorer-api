@@ -17,6 +17,10 @@ const userIdMessage = 'Пользователь по указанному _id н
 const invalidIdMessage = 'Передан невалидный _id.';
 const emailDuplicateMessage = 'Пользователь с указанным email уже существует.';
 const urlErrorMessage = 'Некорректный формат ссылки.';
+const notFoundMessage = 'Ресурс не найден.';
+const authMessage = 'Необходима авторизация.';
+const wrongDataMessage = 'Неправильные почта или пароль.';
+const incorrectEmailMessage = 'Некорректный формат почты.';
 
 export {
   MONGO_DUPLICATE_ERROR_CODE,
@@ -36,4 +40,8 @@ export {
   invalidIdMessage,
   emailDuplicateMessage,
   urlErrorMessage,
+  notFoundMessage,
+  authMessage,
+  wrongDataMessage,
+  incorrectEmailMessage,
 };

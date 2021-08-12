@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import isEmail from 'validator/lib/isEmail.js';
+import { incorrectEmailMessage, wrongDataMessage } from '../utils/constants.js';
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -9,7 +10,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (v) => isEmail(v),
-      message: 'Некорректный формат почты.',
+      message: incorrectEmailMessage,
     },
   },
   password: {
@@ -31,13 +32,13 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль.'));
+        return Promise.reject(new Error(wrongDataMessage));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль.'));
+            return Promise.reject(new Error(wrongDataMessage));
           }
 
           return user;
